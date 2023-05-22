@@ -1,0 +1,1487 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Grammar
+
+Rule 0     S' -> programa
+Rule 1     programa -> PROGRAM ID EOL programa1
+Rule 2     programa1 -> body END
+Rule 3     programa1 -> vars body END
+Rule 4     vars -> VAR ID vars1
+Rule 5     vars1 -> COMMA ID vars1
+Rule 6     vars1 -> COLON type EOL vars3
+Rule 7     vars2 -> ID vars1
+Rule 8     vars3 -> vars2
+Rule 9     vars3 -> <empty>
+Rule 10    type -> INT
+Rule 11    type -> FLOAT
+Rule 12    body -> LBRACKET body1 RBRACKET
+Rule 13    body1 -> statement body1
+Rule 14    body1 -> <empty>
+Rule 15    statement -> assign
+Rule 16    statement -> condition
+Rule 17    statement -> cycle
+Rule 18    statement -> print
+Rule 19    print -> COUT LPAREN print1
+Rule 20    print1 -> expression print2
+Rule 21    print1 -> CTE_STRING print2
+Rule 22    print2 -> COMMA print1
+Rule 23    print2 -> RPAREN EOL
+Rule 24    assign -> ID EQUAL expression EOL
+Rule 25    expression -> exp expression1
+Rule 26    expression1 -> GREATER exp
+Rule 27    expression1 -> LESS exp
+Rule 28    expression1 -> NOTEQUAL exp
+Rule 29    expression1 -> <empty>
+Rule 30    cycle -> DO body WHILE LPAREN expression RPAREN EOL
+Rule 31    condition -> IF LPAREN expression RPAREN body condition1
+Rule 32    condition1 -> ELSE body EOL
+Rule 33    condition1 -> EOL
+Rule 34    factor -> LPAREN expression RPAREN
+Rule 35    factor -> PLUS factor1
+Rule 36    factor -> MINUS factor1
+Rule 37    factor -> factor1
+Rule 38    factor1 -> ID
+Rule 39    factor1 -> cte
+Rule 40    exp -> exp1
+Rule 41    exp1 -> term PLUS exp1
+Rule 42    exp1 -> term MINUS exp1
+Rule 43    exp1 -> term
+Rule 44    term -> term1
+Rule 45    term1 -> factor MULTIPLY term1
+Rule 46    term1 -> factor DIVIDE term1
+Rule 47    term1 -> factor
+Rule 48    cte -> CTE_INT
+Rule 49    cte -> CTE_FLOAT
+
+Terminals, with rules where they appear
+
+COLON                : 6
+COMMA                : 5 22
+COUT                 : 19
+CTE_FLOAT            : 49
+CTE_INT              : 48
+CTE_STRING           : 21
+DIVIDE               : 46
+DO                   : 30
+ELSE                 : 32
+END                  : 2 3
+EOL                  : 1 6 23 24 30 32 33
+EQUAL                : 24
+FLOAT                : 11
+GREATER              : 26
+ID                   : 1 4 5 7 24 38
+IF                   : 31
+INT                  : 10
+LBRACKET             : 12
+LESS                 : 27
+LPAREN               : 19 30 31 34
+MINUS                : 36 42
+MULTIPLY             : 45
+NOTEQUAL             : 28
+PLUS                 : 35 41
+PROGRAM              : 1
+RBRACKET             : 12
+RPAREN               : 23 30 31 34
+VAR                  : 4
+WHILE                : 30
+error                : 
+
+Nonterminals, with rules where they appear
+
+assign               : 15
+body                 : 2 3 30 31 32
+body1                : 12 13
+condition            : 16
+condition1           : 31
+cte                  : 39
+cycle                : 17
+exp                  : 25 26 27 28
+exp1                 : 40 41 42
+expression           : 20 24 30 31 34
+expression1          : 25
+factor               : 45 46 47
+factor1              : 35 36 37
+print                : 18
+print1               : 19 22
+print2               : 20 21
+programa             : 0
+programa1            : 1
+statement            : 13
+term                 : 41 42 43
+term1                : 44 45 46
+type                 : 6
+vars                 : 3
+vars1                : 4 5 7
+vars2                : 8
+vars3                : 6
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . programa
+    (1) programa -> . PROGRAM ID EOL programa1
+
+    PROGRAM         shift and go to state 2
+
+    programa                       shift and go to state 1
+
+state 1
+
+    (0) S' -> programa .
+
+
+
+state 2
+
+    (1) programa -> PROGRAM . ID EOL programa1
+
+    ID              shift and go to state 3
+
+
+state 3
+
+    (1) programa -> PROGRAM ID . EOL programa1
+
+    EOL             shift and go to state 4
+
+
+state 4
+
+    (1) programa -> PROGRAM ID EOL . programa1
+    (2) programa1 -> . body END
+    (3) programa1 -> . vars body END
+    (12) body -> . LBRACKET body1 RBRACKET
+    (4) vars -> . VAR ID vars1
+
+    LBRACKET        shift and go to state 8
+    VAR             shift and go to state 9
+
+    programa1                      shift and go to state 5
+    body                           shift and go to state 6
+    vars                           shift and go to state 7
+
+state 5
+
+    (1) programa -> PROGRAM ID EOL programa1 .
+
+    $end            reduce using rule 1 (programa -> PROGRAM ID EOL programa1 .)
+
+
+state 6
+
+    (2) programa1 -> body . END
+
+    END             shift and go to state 10
+
+
+state 7
+
+    (3) programa1 -> vars . body END
+    (12) body -> . LBRACKET body1 RBRACKET
+
+    LBRACKET        shift and go to state 8
+
+    body                           shift and go to state 11
+
+state 8
+
+    (12) body -> LBRACKET . body1 RBRACKET
+    (13) body1 -> . statement body1
+    (14) body1 -> .
+    (15) statement -> . assign
+    (16) statement -> . condition
+    (17) statement -> . cycle
+    (18) statement -> . print
+    (24) assign -> . ID EQUAL expression EOL
+    (31) condition -> . IF LPAREN expression RPAREN body condition1
+    (30) cycle -> . DO body WHILE LPAREN expression RPAREN EOL
+    (19) print -> . COUT LPAREN print1
+
+    RBRACKET        reduce using rule 14 (body1 -> .)
+    ID              shift and go to state 18
+    IF              shift and go to state 19
+    DO              shift and go to state 20
+    COUT            shift and go to state 21
+
+    body1                          shift and go to state 12
+    statement                      shift and go to state 13
+    assign                         shift and go to state 14
+    condition                      shift and go to state 15
+    cycle                          shift and go to state 16
+    print                          shift and go to state 17
+
+state 9
+
+    (4) vars -> VAR . ID vars1
+
+    ID              shift and go to state 22
+
+
+state 10
+
+    (2) programa1 -> body END .
+
+    $end            reduce using rule 2 (programa1 -> body END .)
+
+
+state 11
+
+    (3) programa1 -> vars body . END
+
+    END             shift and go to state 23
+
+
+state 12
+
+    (12) body -> LBRACKET body1 . RBRACKET
+
+    RBRACKET        shift and go to state 24
+
+
+state 13
+
+    (13) body1 -> statement . body1
+    (13) body1 -> . statement body1
+    (14) body1 -> .
+    (15) statement -> . assign
+    (16) statement -> . condition
+    (17) statement -> . cycle
+    (18) statement -> . print
+    (24) assign -> . ID EQUAL expression EOL
+    (31) condition -> . IF LPAREN expression RPAREN body condition1
+    (30) cycle -> . DO body WHILE LPAREN expression RPAREN EOL
+    (19) print -> . COUT LPAREN print1
+
+    RBRACKET        reduce using rule 14 (body1 -> .)
+    ID              shift and go to state 18
+    IF              shift and go to state 19
+    DO              shift and go to state 20
+    COUT            shift and go to state 21
+
+    statement                      shift and go to state 13
+    body1                          shift and go to state 25
+    assign                         shift and go to state 14
+    condition                      shift and go to state 15
+    cycle                          shift and go to state 16
+    print                          shift and go to state 17
+
+state 14
+
+    (15) statement -> assign .
+
+    ID              reduce using rule 15 (statement -> assign .)
+    IF              reduce using rule 15 (statement -> assign .)
+    DO              reduce using rule 15 (statement -> assign .)
+    COUT            reduce using rule 15 (statement -> assign .)
+    RBRACKET        reduce using rule 15 (statement -> assign .)
+
+
+state 15
+
+    (16) statement -> condition .
+
+    ID              reduce using rule 16 (statement -> condition .)
+    IF              reduce using rule 16 (statement -> condition .)
+    DO              reduce using rule 16 (statement -> condition .)
+    COUT            reduce using rule 16 (statement -> condition .)
+    RBRACKET        reduce using rule 16 (statement -> condition .)
+
+
+state 16
+
+    (17) statement -> cycle .
+
+    ID              reduce using rule 17 (statement -> cycle .)
+    IF              reduce using rule 17 (statement -> cycle .)
+    DO              reduce using rule 17 (statement -> cycle .)
+    COUT            reduce using rule 17 (statement -> cycle .)
+    RBRACKET        reduce using rule 17 (statement -> cycle .)
+
+
+state 17
+
+    (18) statement -> print .
+
+    ID              reduce using rule 18 (statement -> print .)
+    IF              reduce using rule 18 (statement -> print .)
+    DO              reduce using rule 18 (statement -> print .)
+    COUT            reduce using rule 18 (statement -> print .)
+    RBRACKET        reduce using rule 18 (statement -> print .)
+
+
+state 18
+
+    (24) assign -> ID . EQUAL expression EOL
+
+    EQUAL           shift and go to state 26
+
+
+state 19
+
+    (31) condition -> IF . LPAREN expression RPAREN body condition1
+
+    LPAREN          shift and go to state 27
+
+
+state 20
+
+    (30) cycle -> DO . body WHILE LPAREN expression RPAREN EOL
+    (12) body -> . LBRACKET body1 RBRACKET
+
+    LBRACKET        shift and go to state 8
+
+    body                           shift and go to state 28
+
+state 21
+
+    (19) print -> COUT . LPAREN print1
+
+    LPAREN          shift and go to state 29
+
+
+state 22
+
+    (4) vars -> VAR ID . vars1
+    (5) vars1 -> . COMMA ID vars1
+    (6) vars1 -> . COLON type EOL vars3
+
+    COMMA           shift and go to state 31
+    COLON           shift and go to state 32
+
+    vars1                          shift and go to state 30
+
+state 23
+
+    (3) programa1 -> vars body END .
+
+    $end            reduce using rule 3 (programa1 -> vars body END .)
+
+
+state 24
+
+    (12) body -> LBRACKET body1 RBRACKET .
+
+    END             reduce using rule 12 (body -> LBRACKET body1 RBRACKET .)
+    WHILE           reduce using rule 12 (body -> LBRACKET body1 RBRACKET .)
+    ELSE            reduce using rule 12 (body -> LBRACKET body1 RBRACKET .)
+    EOL             reduce using rule 12 (body -> LBRACKET body1 RBRACKET .)
+
+
+state 25
+
+    (13) body1 -> statement body1 .
+
+    RBRACKET        reduce using rule 13 (body1 -> statement body1 .)
+
+
+state 26
+
+    (24) assign -> ID EQUAL . expression EOL
+    (25) expression -> . exp expression1
+    (40) exp -> . exp1
+    (41) exp1 -> . term PLUS exp1
+    (42) exp1 -> . term MINUS exp1
+    (43) exp1 -> . term
+    (44) term -> . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    expression                     shift and go to state 34
+    exp                            shift and go to state 35
+    exp1                           shift and go to state 36
+    term                           shift and go to state 37
+    term1                          shift and go to state 40
+    factor                         shift and go to state 41
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 27
+
+    (31) condition -> IF LPAREN . expression RPAREN body condition1
+    (25) expression -> . exp expression1
+    (40) exp -> . exp1
+    (41) exp1 -> . term PLUS exp1
+    (42) exp1 -> . term MINUS exp1
+    (43) exp1 -> . term
+    (44) term -> . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    expression                     shift and go to state 47
+    exp                            shift and go to state 35
+    exp1                           shift and go to state 36
+    term                           shift and go to state 37
+    term1                          shift and go to state 40
+    factor                         shift and go to state 41
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 28
+
+    (30) cycle -> DO body . WHILE LPAREN expression RPAREN EOL
+
+    WHILE           shift and go to state 48
+
+
+state 29
+
+    (19) print -> COUT LPAREN . print1
+    (20) print1 -> . expression print2
+    (21) print1 -> . CTE_STRING print2
+    (25) expression -> . exp expression1
+    (40) exp -> . exp1
+    (41) exp1 -> . term PLUS exp1
+    (42) exp1 -> . term MINUS exp1
+    (43) exp1 -> . term
+    (44) term -> . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    CTE_STRING      shift and go to state 51
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    print1                         shift and go to state 49
+    expression                     shift and go to state 50
+    exp                            shift and go to state 35
+    exp1                           shift and go to state 36
+    term                           shift and go to state 37
+    term1                          shift and go to state 40
+    factor                         shift and go to state 41
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 30
+
+    (4) vars -> VAR ID vars1 .
+
+    LBRACKET        reduce using rule 4 (vars -> VAR ID vars1 .)
+
+
+state 31
+
+    (5) vars1 -> COMMA . ID vars1
+
+    ID              shift and go to state 52
+
+
+state 32
+
+    (6) vars1 -> COLON . type EOL vars3
+    (10) type -> . INT
+    (11) type -> . FLOAT
+
+    INT             shift and go to state 54
+    FLOAT           shift and go to state 55
+
+    type                           shift and go to state 53
+
+state 33
+
+    (38) factor1 -> ID .
+
+    MULTIPLY        reduce using rule 38 (factor1 -> ID .)
+    DIVIDE          reduce using rule 38 (factor1 -> ID .)
+    PLUS            reduce using rule 38 (factor1 -> ID .)
+    MINUS           reduce using rule 38 (factor1 -> ID .)
+    GREATER         reduce using rule 38 (factor1 -> ID .)
+    LESS            reduce using rule 38 (factor1 -> ID .)
+    NOTEQUAL        reduce using rule 38 (factor1 -> ID .)
+    EOL             reduce using rule 38 (factor1 -> ID .)
+    RPAREN          reduce using rule 38 (factor1 -> ID .)
+    COMMA           reduce using rule 38 (factor1 -> ID .)
+
+
+state 34
+
+    (24) assign -> ID EQUAL expression . EOL
+
+    EOL             shift and go to state 56
+
+
+state 35
+
+    (25) expression -> exp . expression1
+    (26) expression1 -> . GREATER exp
+    (27) expression1 -> . LESS exp
+    (28) expression1 -> . NOTEQUAL exp
+    (29) expression1 -> .
+
+    GREATER         shift and go to state 58
+    LESS            shift and go to state 59
+    NOTEQUAL        shift and go to state 60
+    EOL             reduce using rule 29 (expression1 -> .)
+    RPAREN          reduce using rule 29 (expression1 -> .)
+    COMMA           reduce using rule 29 (expression1 -> .)
+
+    expression1                    shift and go to state 57
+
+state 36
+
+    (40) exp -> exp1 .
+
+    GREATER         reduce using rule 40 (exp -> exp1 .)
+    LESS            reduce using rule 40 (exp -> exp1 .)
+    NOTEQUAL        reduce using rule 40 (exp -> exp1 .)
+    EOL             reduce using rule 40 (exp -> exp1 .)
+    RPAREN          reduce using rule 40 (exp -> exp1 .)
+    COMMA           reduce using rule 40 (exp -> exp1 .)
+
+
+state 37
+
+    (41) exp1 -> term . PLUS exp1
+    (42) exp1 -> term . MINUS exp1
+    (43) exp1 -> term .
+
+    PLUS            shift and go to state 61
+    MINUS           shift and go to state 62
+    GREATER         reduce using rule 43 (exp1 -> term .)
+    LESS            reduce using rule 43 (exp1 -> term .)
+    NOTEQUAL        reduce using rule 43 (exp1 -> term .)
+    EOL             reduce using rule 43 (exp1 -> term .)
+    RPAREN          reduce using rule 43 (exp1 -> term .)
+    COMMA           reduce using rule 43 (exp1 -> term .)
+
+
+state 38
+
+    (35) factor -> PLUS . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    factor1                        shift and go to state 63
+    cte                            shift and go to state 44
+
+state 39
+
+    (36) factor -> MINUS . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    factor1                        shift and go to state 64
+    cte                            shift and go to state 44
+
+state 40
+
+    (44) term -> term1 .
+
+    PLUS            reduce using rule 44 (term -> term1 .)
+    MINUS           reduce using rule 44 (term -> term1 .)
+    GREATER         reduce using rule 44 (term -> term1 .)
+    LESS            reduce using rule 44 (term -> term1 .)
+    NOTEQUAL        reduce using rule 44 (term -> term1 .)
+    EOL             reduce using rule 44 (term -> term1 .)
+    RPAREN          reduce using rule 44 (term -> term1 .)
+    COMMA           reduce using rule 44 (term -> term1 .)
+
+
+state 41
+
+    (45) term1 -> factor . MULTIPLY term1
+    (46) term1 -> factor . DIVIDE term1
+    (47) term1 -> factor .
+
+    MULTIPLY        shift and go to state 65
+    DIVIDE          shift and go to state 66
+    PLUS            reduce using rule 47 (term1 -> factor .)
+    MINUS           reduce using rule 47 (term1 -> factor .)
+    GREATER         reduce using rule 47 (term1 -> factor .)
+    LESS            reduce using rule 47 (term1 -> factor .)
+    NOTEQUAL        reduce using rule 47 (term1 -> factor .)
+    EOL             reduce using rule 47 (term1 -> factor .)
+    RPAREN          reduce using rule 47 (term1 -> factor .)
+    COMMA           reduce using rule 47 (term1 -> factor .)
+
+
+state 42
+
+    (34) factor -> LPAREN . expression RPAREN
+    (25) expression -> . exp expression1
+    (40) exp -> . exp1
+    (41) exp1 -> . term PLUS exp1
+    (42) exp1 -> . term MINUS exp1
+    (43) exp1 -> . term
+    (44) term -> . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    expression                     shift and go to state 67
+    exp                            shift and go to state 35
+    exp1                           shift and go to state 36
+    term                           shift and go to state 37
+    term1                          shift and go to state 40
+    factor                         shift and go to state 41
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 43
+
+    (37) factor -> factor1 .
+
+    MULTIPLY        reduce using rule 37 (factor -> factor1 .)
+    DIVIDE          reduce using rule 37 (factor -> factor1 .)
+    PLUS            reduce using rule 37 (factor -> factor1 .)
+    MINUS           reduce using rule 37 (factor -> factor1 .)
+    GREATER         reduce using rule 37 (factor -> factor1 .)
+    LESS            reduce using rule 37 (factor -> factor1 .)
+    NOTEQUAL        reduce using rule 37 (factor -> factor1 .)
+    EOL             reduce using rule 37 (factor -> factor1 .)
+    RPAREN          reduce using rule 37 (factor -> factor1 .)
+    COMMA           reduce using rule 37 (factor -> factor1 .)
+
+
+state 44
+
+    (39) factor1 -> cte .
+
+    MULTIPLY        reduce using rule 39 (factor1 -> cte .)
+    DIVIDE          reduce using rule 39 (factor1 -> cte .)
+    PLUS            reduce using rule 39 (factor1 -> cte .)
+    MINUS           reduce using rule 39 (factor1 -> cte .)
+    GREATER         reduce using rule 39 (factor1 -> cte .)
+    LESS            reduce using rule 39 (factor1 -> cte .)
+    NOTEQUAL        reduce using rule 39 (factor1 -> cte .)
+    EOL             reduce using rule 39 (factor1 -> cte .)
+    RPAREN          reduce using rule 39 (factor1 -> cte .)
+    COMMA           reduce using rule 39 (factor1 -> cte .)
+
+
+state 45
+
+    (48) cte -> CTE_INT .
+
+    MULTIPLY        reduce using rule 48 (cte -> CTE_INT .)
+    DIVIDE          reduce using rule 48 (cte -> CTE_INT .)
+    PLUS            reduce using rule 48 (cte -> CTE_INT .)
+    MINUS           reduce using rule 48 (cte -> CTE_INT .)
+    GREATER         reduce using rule 48 (cte -> CTE_INT .)
+    LESS            reduce using rule 48 (cte -> CTE_INT .)
+    NOTEQUAL        reduce using rule 48 (cte -> CTE_INT .)
+    EOL             reduce using rule 48 (cte -> CTE_INT .)
+    RPAREN          reduce using rule 48 (cte -> CTE_INT .)
+    COMMA           reduce using rule 48 (cte -> CTE_INT .)
+
+
+state 46
+
+    (49) cte -> CTE_FLOAT .
+
+    MULTIPLY        reduce using rule 49 (cte -> CTE_FLOAT .)
+    DIVIDE          reduce using rule 49 (cte -> CTE_FLOAT .)
+    PLUS            reduce using rule 49 (cte -> CTE_FLOAT .)
+    MINUS           reduce using rule 49 (cte -> CTE_FLOAT .)
+    GREATER         reduce using rule 49 (cte -> CTE_FLOAT .)
+    LESS            reduce using rule 49 (cte -> CTE_FLOAT .)
+    NOTEQUAL        reduce using rule 49 (cte -> CTE_FLOAT .)
+    EOL             reduce using rule 49 (cte -> CTE_FLOAT .)
+    RPAREN          reduce using rule 49 (cte -> CTE_FLOAT .)
+    COMMA           reduce using rule 49 (cte -> CTE_FLOAT .)
+
+
+state 47
+
+    (31) condition -> IF LPAREN expression . RPAREN body condition1
+
+    RPAREN          shift and go to state 68
+
+
+state 48
+
+    (30) cycle -> DO body WHILE . LPAREN expression RPAREN EOL
+
+    LPAREN          shift and go to state 69
+
+
+state 49
+
+    (19) print -> COUT LPAREN print1 .
+
+    ID              reduce using rule 19 (print -> COUT LPAREN print1 .)
+    IF              reduce using rule 19 (print -> COUT LPAREN print1 .)
+    DO              reduce using rule 19 (print -> COUT LPAREN print1 .)
+    COUT            reduce using rule 19 (print -> COUT LPAREN print1 .)
+    RBRACKET        reduce using rule 19 (print -> COUT LPAREN print1 .)
+
+
+state 50
+
+    (20) print1 -> expression . print2
+    (22) print2 -> . COMMA print1
+    (23) print2 -> . RPAREN EOL
+
+    COMMA           shift and go to state 71
+    RPAREN          shift and go to state 72
+
+    print2                         shift and go to state 70
+
+state 51
+
+    (21) print1 -> CTE_STRING . print2
+    (22) print2 -> . COMMA print1
+    (23) print2 -> . RPAREN EOL
+
+    COMMA           shift and go to state 71
+    RPAREN          shift and go to state 72
+
+    print2                         shift and go to state 73
+
+state 52
+
+    (5) vars1 -> COMMA ID . vars1
+    (5) vars1 -> . COMMA ID vars1
+    (6) vars1 -> . COLON type EOL vars3
+
+    COMMA           shift and go to state 31
+    COLON           shift and go to state 32
+
+    vars1                          shift and go to state 74
+
+state 53
+
+    (6) vars1 -> COLON type . EOL vars3
+
+    EOL             shift and go to state 75
+
+
+state 54
+
+    (10) type -> INT .
+
+    EOL             reduce using rule 10 (type -> INT .)
+
+
+state 55
+
+    (11) type -> FLOAT .
+
+    EOL             reduce using rule 11 (type -> FLOAT .)
+
+
+state 56
+
+    (24) assign -> ID EQUAL expression EOL .
+
+    ID              reduce using rule 24 (assign -> ID EQUAL expression EOL .)
+    IF              reduce using rule 24 (assign -> ID EQUAL expression EOL .)
+    DO              reduce using rule 24 (assign -> ID EQUAL expression EOL .)
+    COUT            reduce using rule 24 (assign -> ID EQUAL expression EOL .)
+    RBRACKET        reduce using rule 24 (assign -> ID EQUAL expression EOL .)
+
+
+state 57
+
+    (25) expression -> exp expression1 .
+
+    EOL             reduce using rule 25 (expression -> exp expression1 .)
+    RPAREN          reduce using rule 25 (expression -> exp expression1 .)
+    COMMA           reduce using rule 25 (expression -> exp expression1 .)
+
+
+state 58
+
+    (26) expression1 -> GREATER . exp
+    (40) exp -> . exp1
+    (41) exp1 -> . term PLUS exp1
+    (42) exp1 -> . term MINUS exp1
+    (43) exp1 -> . term
+    (44) term -> . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    exp                            shift and go to state 76
+    exp1                           shift and go to state 36
+    term                           shift and go to state 37
+    term1                          shift and go to state 40
+    factor                         shift and go to state 41
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 59
+
+    (27) expression1 -> LESS . exp
+    (40) exp -> . exp1
+    (41) exp1 -> . term PLUS exp1
+    (42) exp1 -> . term MINUS exp1
+    (43) exp1 -> . term
+    (44) term -> . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    exp                            shift and go to state 77
+    exp1                           shift and go to state 36
+    term                           shift and go to state 37
+    term1                          shift and go to state 40
+    factor                         shift and go to state 41
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 60
+
+    (28) expression1 -> NOTEQUAL . exp
+    (40) exp -> . exp1
+    (41) exp1 -> . term PLUS exp1
+    (42) exp1 -> . term MINUS exp1
+    (43) exp1 -> . term
+    (44) term -> . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    exp                            shift and go to state 78
+    exp1                           shift and go to state 36
+    term                           shift and go to state 37
+    term1                          shift and go to state 40
+    factor                         shift and go to state 41
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 61
+
+    (41) exp1 -> term PLUS . exp1
+    (41) exp1 -> . term PLUS exp1
+    (42) exp1 -> . term MINUS exp1
+    (43) exp1 -> . term
+    (44) term -> . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    term                           shift and go to state 37
+    exp1                           shift and go to state 79
+    term1                          shift and go to state 40
+    factor                         shift and go to state 41
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 62
+
+    (42) exp1 -> term MINUS . exp1
+    (41) exp1 -> . term PLUS exp1
+    (42) exp1 -> . term MINUS exp1
+    (43) exp1 -> . term
+    (44) term -> . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    term                           shift and go to state 37
+    exp1                           shift and go to state 80
+    term1                          shift and go to state 40
+    factor                         shift and go to state 41
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 63
+
+    (35) factor -> PLUS factor1 .
+
+    MULTIPLY        reduce using rule 35 (factor -> PLUS factor1 .)
+    DIVIDE          reduce using rule 35 (factor -> PLUS factor1 .)
+    PLUS            reduce using rule 35 (factor -> PLUS factor1 .)
+    MINUS           reduce using rule 35 (factor -> PLUS factor1 .)
+    GREATER         reduce using rule 35 (factor -> PLUS factor1 .)
+    LESS            reduce using rule 35 (factor -> PLUS factor1 .)
+    NOTEQUAL        reduce using rule 35 (factor -> PLUS factor1 .)
+    EOL             reduce using rule 35 (factor -> PLUS factor1 .)
+    RPAREN          reduce using rule 35 (factor -> PLUS factor1 .)
+    COMMA           reduce using rule 35 (factor -> PLUS factor1 .)
+
+
+state 64
+
+    (36) factor -> MINUS factor1 .
+
+    MULTIPLY        reduce using rule 36 (factor -> MINUS factor1 .)
+    DIVIDE          reduce using rule 36 (factor -> MINUS factor1 .)
+    PLUS            reduce using rule 36 (factor -> MINUS factor1 .)
+    MINUS           reduce using rule 36 (factor -> MINUS factor1 .)
+    GREATER         reduce using rule 36 (factor -> MINUS factor1 .)
+    LESS            reduce using rule 36 (factor -> MINUS factor1 .)
+    NOTEQUAL        reduce using rule 36 (factor -> MINUS factor1 .)
+    EOL             reduce using rule 36 (factor -> MINUS factor1 .)
+    RPAREN          reduce using rule 36 (factor -> MINUS factor1 .)
+    COMMA           reduce using rule 36 (factor -> MINUS factor1 .)
+
+
+state 65
+
+    (45) term1 -> factor MULTIPLY . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    factor                         shift and go to state 41
+    term1                          shift and go to state 81
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 66
+
+    (46) term1 -> factor DIVIDE . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    factor                         shift and go to state 41
+    term1                          shift and go to state 82
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 67
+
+    (34) factor -> LPAREN expression . RPAREN
+
+    RPAREN          shift and go to state 83
+
+
+state 68
+
+    (31) condition -> IF LPAREN expression RPAREN . body condition1
+    (12) body -> . LBRACKET body1 RBRACKET
+
+    LBRACKET        shift and go to state 8
+
+    body                           shift and go to state 84
+
+state 69
+
+    (30) cycle -> DO body WHILE LPAREN . expression RPAREN EOL
+    (25) expression -> . exp expression1
+    (40) exp -> . exp1
+    (41) exp1 -> . term PLUS exp1
+    (42) exp1 -> . term MINUS exp1
+    (43) exp1 -> . term
+    (44) term -> . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    expression                     shift and go to state 85
+    exp                            shift and go to state 35
+    exp1                           shift and go to state 36
+    term                           shift and go to state 37
+    term1                          shift and go to state 40
+    factor                         shift and go to state 41
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 70
+
+    (20) print1 -> expression print2 .
+
+    ID              reduce using rule 20 (print1 -> expression print2 .)
+    IF              reduce using rule 20 (print1 -> expression print2 .)
+    DO              reduce using rule 20 (print1 -> expression print2 .)
+    COUT            reduce using rule 20 (print1 -> expression print2 .)
+    RBRACKET        reduce using rule 20 (print1 -> expression print2 .)
+
+
+state 71
+
+    (22) print2 -> COMMA . print1
+    (20) print1 -> . expression print2
+    (21) print1 -> . CTE_STRING print2
+    (25) expression -> . exp expression1
+    (40) exp -> . exp1
+    (41) exp1 -> . term PLUS exp1
+    (42) exp1 -> . term MINUS exp1
+    (43) exp1 -> . term
+    (44) term -> . term1
+    (45) term1 -> . factor MULTIPLY term1
+    (46) term1 -> . factor DIVIDE term1
+    (47) term1 -> . factor
+    (34) factor -> . LPAREN expression RPAREN
+    (35) factor -> . PLUS factor1
+    (36) factor -> . MINUS factor1
+    (37) factor -> . factor1
+    (38) factor1 -> . ID
+    (39) factor1 -> . cte
+    (48) cte -> . CTE_INT
+    (49) cte -> . CTE_FLOAT
+
+    CTE_STRING      shift and go to state 51
+    LPAREN          shift and go to state 42
+    PLUS            shift and go to state 38
+    MINUS           shift and go to state 39
+    ID              shift and go to state 33
+    CTE_INT         shift and go to state 45
+    CTE_FLOAT       shift and go to state 46
+
+    print1                         shift and go to state 86
+    expression                     shift and go to state 50
+    exp                            shift and go to state 35
+    exp1                           shift and go to state 36
+    term                           shift and go to state 37
+    term1                          shift and go to state 40
+    factor                         shift and go to state 41
+    factor1                        shift and go to state 43
+    cte                            shift and go to state 44
+
+state 72
+
+    (23) print2 -> RPAREN . EOL
+
+    EOL             shift and go to state 87
+
+
+state 73
+
+    (21) print1 -> CTE_STRING print2 .
+
+    ID              reduce using rule 21 (print1 -> CTE_STRING print2 .)
+    IF              reduce using rule 21 (print1 -> CTE_STRING print2 .)
+    DO              reduce using rule 21 (print1 -> CTE_STRING print2 .)
+    COUT            reduce using rule 21 (print1 -> CTE_STRING print2 .)
+    RBRACKET        reduce using rule 21 (print1 -> CTE_STRING print2 .)
+
+
+state 74
+
+    (5) vars1 -> COMMA ID vars1 .
+
+    LBRACKET        reduce using rule 5 (vars1 -> COMMA ID vars1 .)
+
+
+state 75
+
+    (6) vars1 -> COLON type EOL . vars3
+    (8) vars3 -> . vars2
+    (9) vars3 -> .
+    (7) vars2 -> . ID vars1
+
+    LBRACKET        reduce using rule 9 (vars3 -> .)
+    ID              shift and go to state 90
+
+    vars3                          shift and go to state 88
+    vars2                          shift and go to state 89
+
+state 76
+
+    (26) expression1 -> GREATER exp .
+
+    EOL             reduce using rule 26 (expression1 -> GREATER exp .)
+    RPAREN          reduce using rule 26 (expression1 -> GREATER exp .)
+    COMMA           reduce using rule 26 (expression1 -> GREATER exp .)
+
+
+state 77
+
+    (27) expression1 -> LESS exp .
+
+    EOL             reduce using rule 27 (expression1 -> LESS exp .)
+    RPAREN          reduce using rule 27 (expression1 -> LESS exp .)
+    COMMA           reduce using rule 27 (expression1 -> LESS exp .)
+
+
+state 78
+
+    (28) expression1 -> NOTEQUAL exp .
+
+    EOL             reduce using rule 28 (expression1 -> NOTEQUAL exp .)
+    RPAREN          reduce using rule 28 (expression1 -> NOTEQUAL exp .)
+    COMMA           reduce using rule 28 (expression1 -> NOTEQUAL exp .)
+
+
+state 79
+
+    (41) exp1 -> term PLUS exp1 .
+
+    GREATER         reduce using rule 41 (exp1 -> term PLUS exp1 .)
+    LESS            reduce using rule 41 (exp1 -> term PLUS exp1 .)
+    NOTEQUAL        reduce using rule 41 (exp1 -> term PLUS exp1 .)
+    EOL             reduce using rule 41 (exp1 -> term PLUS exp1 .)
+    RPAREN          reduce using rule 41 (exp1 -> term PLUS exp1 .)
+    COMMA           reduce using rule 41 (exp1 -> term PLUS exp1 .)
+
+
+state 80
+
+    (42) exp1 -> term MINUS exp1 .
+
+    GREATER         reduce using rule 42 (exp1 -> term MINUS exp1 .)
+    LESS            reduce using rule 42 (exp1 -> term MINUS exp1 .)
+    NOTEQUAL        reduce using rule 42 (exp1 -> term MINUS exp1 .)
+    EOL             reduce using rule 42 (exp1 -> term MINUS exp1 .)
+    RPAREN          reduce using rule 42 (exp1 -> term MINUS exp1 .)
+    COMMA           reduce using rule 42 (exp1 -> term MINUS exp1 .)
+
+
+state 81
+
+    (45) term1 -> factor MULTIPLY term1 .
+
+    PLUS            reduce using rule 45 (term1 -> factor MULTIPLY term1 .)
+    MINUS           reduce using rule 45 (term1 -> factor MULTIPLY term1 .)
+    GREATER         reduce using rule 45 (term1 -> factor MULTIPLY term1 .)
+    LESS            reduce using rule 45 (term1 -> factor MULTIPLY term1 .)
+    NOTEQUAL        reduce using rule 45 (term1 -> factor MULTIPLY term1 .)
+    EOL             reduce using rule 45 (term1 -> factor MULTIPLY term1 .)
+    RPAREN          reduce using rule 45 (term1 -> factor MULTIPLY term1 .)
+    COMMA           reduce using rule 45 (term1 -> factor MULTIPLY term1 .)
+
+
+state 82
+
+    (46) term1 -> factor DIVIDE term1 .
+
+    PLUS            reduce using rule 46 (term1 -> factor DIVIDE term1 .)
+    MINUS           reduce using rule 46 (term1 -> factor DIVIDE term1 .)
+    GREATER         reduce using rule 46 (term1 -> factor DIVIDE term1 .)
+    LESS            reduce using rule 46 (term1 -> factor DIVIDE term1 .)
+    NOTEQUAL        reduce using rule 46 (term1 -> factor DIVIDE term1 .)
+    EOL             reduce using rule 46 (term1 -> factor DIVIDE term1 .)
+    RPAREN          reduce using rule 46 (term1 -> factor DIVIDE term1 .)
+    COMMA           reduce using rule 46 (term1 -> factor DIVIDE term1 .)
+
+
+state 83
+
+    (34) factor -> LPAREN expression RPAREN .
+
+    MULTIPLY        reduce using rule 34 (factor -> LPAREN expression RPAREN .)
+    DIVIDE          reduce using rule 34 (factor -> LPAREN expression RPAREN .)
+    PLUS            reduce using rule 34 (factor -> LPAREN expression RPAREN .)
+    MINUS           reduce using rule 34 (factor -> LPAREN expression RPAREN .)
+    GREATER         reduce using rule 34 (factor -> LPAREN expression RPAREN .)
+    LESS            reduce using rule 34 (factor -> LPAREN expression RPAREN .)
+    NOTEQUAL        reduce using rule 34 (factor -> LPAREN expression RPAREN .)
+    EOL             reduce using rule 34 (factor -> LPAREN expression RPAREN .)
+    RPAREN          reduce using rule 34 (factor -> LPAREN expression RPAREN .)
+    COMMA           reduce using rule 34 (factor -> LPAREN expression RPAREN .)
+
+
+state 84
+
+    (31) condition -> IF LPAREN expression RPAREN body . condition1
+    (32) condition1 -> . ELSE body EOL
+    (33) condition1 -> . EOL
+
+    ELSE            shift and go to state 92
+    EOL             shift and go to state 93
+
+    condition1                     shift and go to state 91
+
+state 85
+
+    (30) cycle -> DO body WHILE LPAREN expression . RPAREN EOL
+
+    RPAREN          shift and go to state 94
+
+
+state 86
+
+    (22) print2 -> COMMA print1 .
+
+    ID              reduce using rule 22 (print2 -> COMMA print1 .)
+    IF              reduce using rule 22 (print2 -> COMMA print1 .)
+    DO              reduce using rule 22 (print2 -> COMMA print1 .)
+    COUT            reduce using rule 22 (print2 -> COMMA print1 .)
+    RBRACKET        reduce using rule 22 (print2 -> COMMA print1 .)
+
+
+state 87
+
+    (23) print2 -> RPAREN EOL .
+
+    ID              reduce using rule 23 (print2 -> RPAREN EOL .)
+    IF              reduce using rule 23 (print2 -> RPAREN EOL .)
+    DO              reduce using rule 23 (print2 -> RPAREN EOL .)
+    COUT            reduce using rule 23 (print2 -> RPAREN EOL .)
+    RBRACKET        reduce using rule 23 (print2 -> RPAREN EOL .)
+
+
+state 88
+
+    (6) vars1 -> COLON type EOL vars3 .
+
+    LBRACKET        reduce using rule 6 (vars1 -> COLON type EOL vars3 .)
+
+
+state 89
+
+    (8) vars3 -> vars2 .
+
+    LBRACKET        reduce using rule 8 (vars3 -> vars2 .)
+
+
+state 90
+
+    (7) vars2 -> ID . vars1
+    (5) vars1 -> . COMMA ID vars1
+    (6) vars1 -> . COLON type EOL vars3
+
+    COMMA           shift and go to state 31
+    COLON           shift and go to state 32
+
+    vars1                          shift and go to state 95
+
+state 91
+
+    (31) condition -> IF LPAREN expression RPAREN body condition1 .
+
+    ID              reduce using rule 31 (condition -> IF LPAREN expression RPAREN body condition1 .)
+    IF              reduce using rule 31 (condition -> IF LPAREN expression RPAREN body condition1 .)
+    DO              reduce using rule 31 (condition -> IF LPAREN expression RPAREN body condition1 .)
+    COUT            reduce using rule 31 (condition -> IF LPAREN expression RPAREN body condition1 .)
+    RBRACKET        reduce using rule 31 (condition -> IF LPAREN expression RPAREN body condition1 .)
+
+
+state 92
+
+    (32) condition1 -> ELSE . body EOL
+    (12) body -> . LBRACKET body1 RBRACKET
+
+    LBRACKET        shift and go to state 8
+
+    body                           shift and go to state 96
+
+state 93
+
+    (33) condition1 -> EOL .
+
+    ID              reduce using rule 33 (condition1 -> EOL .)
+    IF              reduce using rule 33 (condition1 -> EOL .)
+    DO              reduce using rule 33 (condition1 -> EOL .)
+    COUT            reduce using rule 33 (condition1 -> EOL .)
+    RBRACKET        reduce using rule 33 (condition1 -> EOL .)
+
+
+state 94
+
+    (30) cycle -> DO body WHILE LPAREN expression RPAREN . EOL
+
+    EOL             shift and go to state 97
+
+
+state 95
+
+    (7) vars2 -> ID vars1 .
+
+    LBRACKET        reduce using rule 7 (vars2 -> ID vars1 .)
+
+
+state 96
+
+    (32) condition1 -> ELSE body . EOL
+
+    EOL             shift and go to state 98
+
+
+state 97
+
+    (30) cycle -> DO body WHILE LPAREN expression RPAREN EOL .
+
+    ID              reduce using rule 30 (cycle -> DO body WHILE LPAREN expression RPAREN EOL .)
+    IF              reduce using rule 30 (cycle -> DO body WHILE LPAREN expression RPAREN EOL .)
+    DO              reduce using rule 30 (cycle -> DO body WHILE LPAREN expression RPAREN EOL .)
+    COUT            reduce using rule 30 (cycle -> DO body WHILE LPAREN expression RPAREN EOL .)
+    RBRACKET        reduce using rule 30 (cycle -> DO body WHILE LPAREN expression RPAREN EOL .)
+
+
+state 98
+
+    (32) condition1 -> ELSE body EOL .
+
+    ID              reduce using rule 32 (condition1 -> ELSE body EOL .)
+    IF              reduce using rule 32 (condition1 -> ELSE body EOL .)
+    DO              reduce using rule 32 (condition1 -> ELSE body EOL .)
+    COUT            reduce using rule 32 (condition1 -> ELSE body EOL .)
+    RBRACKET        reduce using rule 32 (condition1 -> ELSE body EOL .)
+
