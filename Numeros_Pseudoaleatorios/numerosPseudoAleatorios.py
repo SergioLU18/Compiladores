@@ -2,6 +2,11 @@ import numpy as np
 import math
 
 
+def format_number(num):
+    formatted_num = "{:.4f}".format(num).rstrip('0').rstrip('.')
+    return formatted_num
+
+
 def process_params(data):
     processed_params = data.split()
     return [int(num) for num in processed_params]
@@ -22,14 +27,16 @@ def solve(index, params_array):
     odd = 0
     numbers = set()
 
+    x = next_random_number(a, c, m, x)
+
     while x not in numbers:
         total_sum += x
         numbers.add(x)
-        x = next_random_number(a, c, m, x)
         if x % 2 == 0:
             even += 1
         else:
             odd += 1
+        x = next_random_number(a, c, m, x)
 
     period = len(numbers)
     minimum = min(numbers)
@@ -41,16 +48,19 @@ def solve(index, params_array):
     variance = sum(squared_diffs) / len(numbers)
     deviation = math.sqrt(variance)
 
-    formatted_average = "{:.4f}".format(round(average, 4))
-    formatted_variance = "{:.4f}".format(round(variance, 4))
-    formatted_deviation = "{:.4f}".format(round(deviation, 4))
+    formatted_average = format_number(average)
+    formatted_variance = format_number(variance)
+    formatted_deviation = format_number(deviation)
 
     print(case, period, formatted_average, formatted_variance, formatted_deviation, minimum, maximum, even, odd)
 
 
 i = 1
 while True:
-    line = input()
+    try:
+        line = input()
+    except EOFError:
+        break
     if line == "0 0 0 0":
         break
     params = process_params(line)
