@@ -83,11 +83,42 @@ def t_error(t):
 
 lexer = lex.lex()
 
+var_table = {}
+step_stack = []
+var_line = []
+
+
+def add_to_step_stack(step):
+    global step_stack, tokens
+    if step is None or step.upper in tokens:
+        return
+    step_stack.append(step)
+
+
+def process_step_stack():
+    global step_stack, var_table, var_line
+    types = {'int', 'float'}
+    while len(step_stack):
+        step = step_stack.pop()
+        if step in types:
+            var_type = step
+            for i in var_line:
+                var_table[i] = var_type
+            var_line = []
+            continue
+        else:
+            if step in var_table or step in var_line:
+                print("ERROR: VARIABLE '" + step + "' WAS PREVIOUSLY DECLARED")
+                return
+            else:
+                var_line.append(step)
+    print(var_table)
+    print('Code compiled without errors')
+
 def p_programa(p):
     '''
     programa : PROGRAM ID EOL programa1
     '''
-    print('Code compiled without errors')
 
 def p_programa1(p):
     '''
@@ -99,17 +130,20 @@ def p_vars(p):
     '''
     vars : VAR ID vars1
     '''
+    add_to_step_stack(p[2])
 
 def p_vars1(p):
     '''
     vars1 : COMMA ID vars1
-            | COLON type EOL vars3
+            | COLON type
     '''
+    add_to_step_stack(p[2])
 
 def p_vars2(p):
     '''
     vars2 : ID vars1
     '''
+    add_to_step_stack(p[1])
 
 def p_vars3(p):
     '''
@@ -119,9 +153,10 @@ def p_vars3(p):
 
 def p_type(p):
     '''
-    type : INT
-        | FLOAT
+    type : INT EOL vars3
+        | FLOAT EOL vars3
     '''
+    add_to_step_stack(p[1])
 
 def p_body(p):
     '''
@@ -247,16 +282,8 @@ def p_error(p):
 
 
 parser = yacc.yacc()
-
-# parser.parse('program case1; var i: int; { i = 0; i = ( i + 1; } end')
-
-# parser.parse('program case2; var a, b, c, d : float; {} end')
-
-# parser.parse('programaa case3; var noFuncionara : string; {} end')
-
-# parser.parse('program case4; var a: int; { i = 0; if(i > 0) { cout("true"); } else { cout("false"); }; } end')
-
-# parser.parse('program case5; var a: int; b: float; { a = 2.5; b = 3; } end')
+parser.parse('program pt2; var i: int; j : float; {} end')
+process_step_stack()
 
 
 

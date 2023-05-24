@@ -8,12 +8,12 @@ Rule 2     programa1 -> body END
 Rule 3     programa1 -> vars body END
 Rule 4     vars -> VAR ID vars1
 Rule 5     vars1 -> COMMA ID vars1
-Rule 6     vars1 -> COLON type EOL vars3
+Rule 6     vars1 -> COLON type
 Rule 7     vars2 -> ID vars1
 Rule 8     vars3 -> vars2
 Rule 9     vars3 -> <empty>
-Rule 10    type -> INT
-Rule 11    type -> FLOAT
+Rule 10    type -> INT EOL vars3
+Rule 11    type -> FLOAT EOL vars3
 Rule 12    body -> LBRACKET body1 RBRACKET
 Rule 13    body1 -> statement body1
 Rule 14    body1 -> <empty>
@@ -65,7 +65,7 @@ DIVIDE               : 46
 DO                   : 30
 ELSE                 : 32
 END                  : 2 3
-EOL                  : 1 6 23 24 30 32 33
+EOL                  : 1 10 11 23 24 30 32 33
 EQUAL                : 24
 FLOAT                : 11
 GREATER              : 26
@@ -113,7 +113,7 @@ type                 : 6
 vars                 : 3
 vars1                : 4 5 7
 vars2                : 8
-vars3                : 6
+vars3                : 10 11
 
 Parsing method: LALR
 
@@ -344,7 +344,7 @@ state 22
 
     (4) vars -> VAR ID . vars1
     (5) vars1 -> . COMMA ID vars1
-    (6) vars1 -> . COLON type EOL vars3
+    (6) vars1 -> . COLON type
 
     COMMA           shift and go to state 31
     COLON           shift and go to state 32
@@ -513,9 +513,9 @@ state 31
 
 state 32
 
-    (6) vars1 -> COLON . type EOL vars3
-    (10) type -> . INT
-    (11) type -> . FLOAT
+    (6) vars1 -> COLON . type
+    (10) type -> . INT EOL vars3
+    (11) type -> . FLOAT EOL vars3
 
     INT             shift and go to state 54
     FLOAT           shift and go to state 55
@@ -804,7 +804,7 @@ state 52
 
     (5) vars1 -> COMMA ID . vars1
     (5) vars1 -> . COMMA ID vars1
-    (6) vars1 -> . COLON type EOL vars3
+    (6) vars1 -> . COLON type
 
     COMMA           shift and go to state 31
     COLON           shift and go to state 32
@@ -813,23 +813,23 @@ state 52
 
 state 53
 
-    (6) vars1 -> COLON type . EOL vars3
+    (6) vars1 -> COLON type .
 
-    EOL             shift and go to state 75
+    LBRACKET        reduce using rule 6 (vars1 -> COLON type .)
 
 
 state 54
 
-    (10) type -> INT .
+    (10) type -> INT . EOL vars3
 
-    EOL             reduce using rule 10 (type -> INT .)
+    EOL             shift and go to state 75
 
 
 state 55
 
-    (11) type -> FLOAT .
+    (11) type -> FLOAT . EOL vars3
 
-    EOL             reduce using rule 11 (type -> FLOAT .)
+    EOL             shift and go to state 76
 
 
 state 56
@@ -879,7 +879,7 @@ state 58
     CTE_INT         shift and go to state 45
     CTE_FLOAT       shift and go to state 46
 
-    exp                            shift and go to state 76
+    exp                            shift and go to state 77
     exp1                           shift and go to state 36
     term                           shift and go to state 37
     term1                          shift and go to state 40
@@ -914,7 +914,7 @@ state 59
     CTE_INT         shift and go to state 45
     CTE_FLOAT       shift and go to state 46
 
-    exp                            shift and go to state 77
+    exp                            shift and go to state 78
     exp1                           shift and go to state 36
     term                           shift and go to state 37
     term1                          shift and go to state 40
@@ -949,7 +949,7 @@ state 60
     CTE_INT         shift and go to state 45
     CTE_FLOAT       shift and go to state 46
 
-    exp                            shift and go to state 78
+    exp                            shift and go to state 79
     exp1                           shift and go to state 36
     term                           shift and go to state 37
     term1                          shift and go to state 40
@@ -984,7 +984,7 @@ state 61
     CTE_FLOAT       shift and go to state 46
 
     term                           shift and go to state 37
-    exp1                           shift and go to state 79
+    exp1                           shift and go to state 80
     term1                          shift and go to state 40
     factor                         shift and go to state 41
     factor1                        shift and go to state 43
@@ -1017,7 +1017,7 @@ state 62
     CTE_FLOAT       shift and go to state 46
 
     term                           shift and go to state 37
-    exp1                           shift and go to state 80
+    exp1                           shift and go to state 81
     term1                          shift and go to state 40
     factor                         shift and go to state 41
     factor1                        shift and go to state 43
@@ -1078,7 +1078,7 @@ state 65
     CTE_FLOAT       shift and go to state 46
 
     factor                         shift and go to state 41
-    term1                          shift and go to state 81
+    term1                          shift and go to state 82
     factor1                        shift and go to state 43
     cte                            shift and go to state 44
 
@@ -1105,7 +1105,7 @@ state 66
     CTE_FLOAT       shift and go to state 46
 
     factor                         shift and go to state 41
-    term1                          shift and go to state 82
+    term1                          shift and go to state 83
     factor1                        shift and go to state 43
     cte                            shift and go to state 44
 
@@ -1113,7 +1113,7 @@ state 67
 
     (34) factor -> LPAREN expression . RPAREN
 
-    RPAREN          shift and go to state 83
+    RPAREN          shift and go to state 84
 
 
 state 68
@@ -1123,7 +1123,7 @@ state 68
 
     LBRACKET        shift and go to state 8
 
-    body                           shift and go to state 84
+    body                           shift and go to state 85
 
 state 69
 
@@ -1153,7 +1153,7 @@ state 69
     CTE_INT         shift and go to state 45
     CTE_FLOAT       shift and go to state 46
 
-    expression                     shift and go to state 85
+    expression                     shift and go to state 86
     exp                            shift and go to state 35
     exp1                           shift and go to state 36
     term                           shift and go to state 37
@@ -1204,7 +1204,7 @@ state 71
     CTE_INT         shift and go to state 45
     CTE_FLOAT       shift and go to state 46
 
-    print1                         shift and go to state 86
+    print1                         shift and go to state 87
     expression                     shift and go to state 50
     exp                            shift and go to state 35
     exp1                           shift and go to state 36
@@ -1218,7 +1218,7 @@ state 72
 
     (23) print2 -> RPAREN . EOL
 
-    EOL             shift and go to state 87
+    EOL             shift and go to state 88
 
 
 state 73
@@ -1241,18 +1241,31 @@ state 74
 
 state 75
 
-    (6) vars1 -> COLON type EOL . vars3
+    (10) type -> INT EOL . vars3
     (8) vars3 -> . vars2
     (9) vars3 -> .
     (7) vars2 -> . ID vars1
 
     LBRACKET        reduce using rule 9 (vars3 -> .)
-    ID              shift and go to state 90
+    ID              shift and go to state 91
 
-    vars3                          shift and go to state 88
-    vars2                          shift and go to state 89
+    vars3                          shift and go to state 89
+    vars2                          shift and go to state 90
 
 state 76
+
+    (11) type -> FLOAT EOL . vars3
+    (8) vars3 -> . vars2
+    (9) vars3 -> .
+    (7) vars2 -> . ID vars1
+
+    LBRACKET        reduce using rule 9 (vars3 -> .)
+    ID              shift and go to state 91
+
+    vars3                          shift and go to state 92
+    vars2                          shift and go to state 90
+
+state 77
 
     (26) expression1 -> GREATER exp .
 
@@ -1261,7 +1274,7 @@ state 76
     COMMA           reduce using rule 26 (expression1 -> GREATER exp .)
 
 
-state 77
+state 78
 
     (27) expression1 -> LESS exp .
 
@@ -1270,7 +1283,7 @@ state 77
     COMMA           reduce using rule 27 (expression1 -> LESS exp .)
 
 
-state 78
+state 79
 
     (28) expression1 -> NOTEQUAL exp .
 
@@ -1279,7 +1292,7 @@ state 78
     COMMA           reduce using rule 28 (expression1 -> NOTEQUAL exp .)
 
 
-state 79
+state 80
 
     (41) exp1 -> term PLUS exp1 .
 
@@ -1291,7 +1304,7 @@ state 79
     COMMA           reduce using rule 41 (exp1 -> term PLUS exp1 .)
 
 
-state 80
+state 81
 
     (42) exp1 -> term MINUS exp1 .
 
@@ -1303,7 +1316,7 @@ state 80
     COMMA           reduce using rule 42 (exp1 -> term MINUS exp1 .)
 
 
-state 81
+state 82
 
     (45) term1 -> factor MULTIPLY term1 .
 
@@ -1317,7 +1330,7 @@ state 81
     COMMA           reduce using rule 45 (term1 -> factor MULTIPLY term1 .)
 
 
-state 82
+state 83
 
     (46) term1 -> factor DIVIDE term1 .
 
@@ -1331,7 +1344,7 @@ state 82
     COMMA           reduce using rule 46 (term1 -> factor DIVIDE term1 .)
 
 
-state 83
+state 84
 
     (34) factor -> LPAREN expression RPAREN .
 
@@ -1347,25 +1360,25 @@ state 83
     COMMA           reduce using rule 34 (factor -> LPAREN expression RPAREN .)
 
 
-state 84
+state 85
 
     (31) condition -> IF LPAREN expression RPAREN body . condition1
     (32) condition1 -> . ELSE body EOL
     (33) condition1 -> . EOL
 
-    ELSE            shift and go to state 92
-    EOL             shift and go to state 93
+    ELSE            shift and go to state 94
+    EOL             shift and go to state 95
 
-    condition1                     shift and go to state 91
+    condition1                     shift and go to state 93
 
-state 85
+state 86
 
     (30) cycle -> DO body WHILE LPAREN expression . RPAREN EOL
 
-    RPAREN          shift and go to state 94
+    RPAREN          shift and go to state 96
 
 
-state 86
+state 87
 
     (22) print2 -> COMMA print1 .
 
@@ -1376,7 +1389,7 @@ state 86
     RBRACKET        reduce using rule 22 (print2 -> COMMA print1 .)
 
 
-state 87
+state 88
 
     (23) print2 -> RPAREN EOL .
 
@@ -1387,32 +1400,39 @@ state 87
     RBRACKET        reduce using rule 23 (print2 -> RPAREN EOL .)
 
 
-state 88
-
-    (6) vars1 -> COLON type EOL vars3 .
-
-    LBRACKET        reduce using rule 6 (vars1 -> COLON type EOL vars3 .)
-
-
 state 89
+
+    (10) type -> INT EOL vars3 .
+
+    LBRACKET        reduce using rule 10 (type -> INT EOL vars3 .)
+
+
+state 90
 
     (8) vars3 -> vars2 .
 
     LBRACKET        reduce using rule 8 (vars3 -> vars2 .)
 
 
-state 90
+state 91
 
     (7) vars2 -> ID . vars1
     (5) vars1 -> . COMMA ID vars1
-    (6) vars1 -> . COLON type EOL vars3
+    (6) vars1 -> . COLON type
 
     COMMA           shift and go to state 31
     COLON           shift and go to state 32
 
-    vars1                          shift and go to state 95
+    vars1                          shift and go to state 97
 
-state 91
+state 92
+
+    (11) type -> FLOAT EOL vars3 .
+
+    LBRACKET        reduce using rule 11 (type -> FLOAT EOL vars3 .)
+
+
+state 93
 
     (31) condition -> IF LPAREN expression RPAREN body condition1 .
 
@@ -1423,16 +1443,16 @@ state 91
     RBRACKET        reduce using rule 31 (condition -> IF LPAREN expression RPAREN body condition1 .)
 
 
-state 92
+state 94
 
     (32) condition1 -> ELSE . body EOL
     (12) body -> . LBRACKET body1 RBRACKET
 
     LBRACKET        shift and go to state 8
 
-    body                           shift and go to state 96
+    body                           shift and go to state 98
 
-state 93
+state 95
 
     (33) condition1 -> EOL .
 
@@ -1443,28 +1463,28 @@ state 93
     RBRACKET        reduce using rule 33 (condition1 -> EOL .)
 
 
-state 94
+state 96
 
     (30) cycle -> DO body WHILE LPAREN expression RPAREN . EOL
 
-    EOL             shift and go to state 97
+    EOL             shift and go to state 99
 
 
-state 95
+state 97
 
     (7) vars2 -> ID vars1 .
 
     LBRACKET        reduce using rule 7 (vars2 -> ID vars1 .)
 
 
-state 96
+state 98
 
     (32) condition1 -> ELSE body . EOL
 
-    EOL             shift and go to state 98
+    EOL             shift and go to state 100
 
 
-state 97
+state 99
 
     (30) cycle -> DO body WHILE LPAREN expression RPAREN EOL .
 
@@ -1475,7 +1495,7 @@ state 97
     RBRACKET        reduce using rule 30 (cycle -> DO body WHILE LPAREN expression RPAREN EOL .)
 
 
-state 98
+state 100
 
     (32) condition1 -> ELSE body EOL .
 
