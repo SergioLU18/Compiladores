@@ -83,6 +83,14 @@ def t_error(t):
 
 lexer = lex.lex()
 
+
+def get_operation_type(a_type, b_type, operation):
+    rel_ops = {'>', '<', '!='}
+    if operation in rel_ops:
+        return 'int'
+    return a_type if a_type == b_type else 'float'
+
+
 var_table = {}
 step_stack = []
 var_line = []
