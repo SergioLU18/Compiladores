@@ -81,19 +81,17 @@ def t_error(t):
     t.lexer.skip(1)
 
 
-lexer = lex.lex()
-
-
-def get_operation_type(a_type, b_type, operation):
-    rel_ops = {'>', '<', '!='}
-    if operation in rel_ops:
-        return 'int'
-    return a_type if a_type == b_type else 'float'
-
-
 var_table = {}
 step_stack = []
 var_line = []
+lexer = lex.lex()
+
+
+def get_operation_result_type(a_type, b_type, operation):
+    global rel_ops
+    if operation in rel_ops:
+        return 'int'
+    return a_type if a_type == b_type else 'float'
 
 
 def add_to_step_stack(step):
@@ -122,6 +120,53 @@ def process_step_stack():
                 var_line.append(step)
     print(var_table)
     print('Code compiled without errors')
+
+
+def generate_operation_quadruple(operands_stack, operator_stack, quadruple_array):
+    global temp_count
+    right_operand = operands_stack.pop()
+    left_operand = operands_stack.pop()
+    operator = operator_stack.pop()
+    temp_count = temp_count + 1
+    new_temp_var = 'T' + str(temp_count)
+    quadruple_array.append([operator, right_operand, left_operand, new_temp_var])
+    operands_stack.append(new_temp_var)
+
+
+rel_ops = {'>', '<', '!='}
+ar_ops = {'+', '-', '*', '/'}
+hierarchy_table = {'+': 2, '-': 2, '*': 1, '/': 1}
+temp_count = 0
+
+def process_expression(expression):
+    global rel_ops, ar_ops, hierarchy_table, temp_count
+    operator_stack = []
+    operands_stack = []
+    quadruple_array = []
+    steps = expression.split()
+    for index, step in enumerate(steps):
+        if step in rel_ops or step in ar_ops:
+            # Before introducing a new operator, we always have to check what the last operator's hierarchy
+            if len(operator_stack) == 0:
+                # If there are no operands, we just continue
+                operator_stack.append(step)
+                continue
+            if hierarchy_table[step] == hierarchy_table[operator_stack[-1]]:
+                # If both have the same hierarchy, then we can solve the last operator
+                generate_operation_quadruple(operands_stack, operator_stack, quadruple_array)
+            elif hierarchy_table[step] == 2:
+                # If new operator has lower hierarchy, then we solve the last operator
+                generate_operation_quadruple(operands_stack, operator_stack, quadruple_array)
+            operator_stack.append(step)
+        else:
+            operands_stack.append(step)
+            while index == len(steps) - 1 and len(operator_stack):
+                generate_operation_quadruple(operands_stack, operator_stack, quadruple_array)
+    for quadruple in quadruple_array:
+        print(quadruple)
+    print('Result is: ' + str(operands_stack.pop()))
+
+
 
 def p_programa(p):
     '''
@@ -290,9 +335,9 @@ def p_error(p):
 
 
 parser = yacc.yacc()
-parser.parse('program pt2; var i: int; j : float; {} end')
-process_step_stack()
-
+# parser.parse('program pt2; var i: int; j : float; {} end')
+# process_step_stack()
+process_expression('A / B + C + D + E * F')
 
 
 
