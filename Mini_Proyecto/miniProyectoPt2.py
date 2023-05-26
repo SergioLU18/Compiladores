@@ -127,10 +127,17 @@ ar_ops = {'+', '-', '*', '/'}
 hierarchy_table = {'*': 1, '/': 1, '+': 2, '-': 2, '<': 3, '>': 3, '!=': 3, '=': 4}
 temp_count = 0
 env = {}
+quadruple_array = []
+token_list = []
 
 
-def solve_operation(operands_stack, operator_stack, quadruple_array):
-    global temp_count, env
+def split_expression(expression):
+    split_tokens = []
+    return split_tokens
+
+
+def solve_operation(operands_stack, operator_stack):
+    global quadruple_array, temp_count, env
     right_operand = operands_stack.pop()
     left_operand = operands_stack.pop()
     operator = operator_stack.pop()
@@ -143,10 +150,9 @@ def solve_operation(operands_stack, operator_stack, quadruple_array):
 
 
 def solve_expression(expression):
-    global rel_ops, ar_ops, hierarchy_table, temp_count, env
+    global quadruple_array, ar_ops, hierarchy_table, temp_count, env
     operator_stack = []
     operands_stack = []
-    quadruple_array = []
     steps = expression.split()
     for index, step in enumerate(steps):
         if step == '(':
@@ -163,37 +169,38 @@ def solve_expression(expression):
                 continue
             while len(operator_stack) and hierarchy_table[operator_stack[-1]] <= hierarchy_table[step]:
                 # If last operator has higher or equal hierarchy, we need to solve
-                solve_operation(operands_stack, operator_stack, quadruple_array)
+                solve_operation(operands_stack, operator_stack)
             operator_stack.append(step)
         elif step == ')':
             # If we find a closing parenthesis, we need to clear everything inside
             while len(operator_stack) and operator_stack[-1] != '(':
-                solve_operation(operands_stack, operator_stack, quadruple_array)
+                solve_operation(operands_stack, operator_stack)
             operator_stack.pop()
         else:
             # If no other conditions were true, then we found an ID
             operands_stack.append(step)
         # After doing all the steps, we need to clear any remaining operations that were already ordered correctly
         while index == len(steps) - 1 and len(operator_stack):
-            solve_operation(operands_stack, operator_stack, quadruple_array)
+            solve_operation(operands_stack, operator_stack)
     print('----- QUADRUPLE LIST -----')
     for quadruple in quadruple_array:
         print(quadruple)
     print('--------------------------')
     print('RESULT IS: ' + str(operands_stack.pop()))
-    print('----- VARIABLE LIST -----')
-    for var, value in env.items():
-        print(var, '=', value)
-    print('-------------------------')
+    # print('----- VARIABLE LIST -----')
+    # for var, value in env.items():
+    #     print(var, '=', value)
+    # print('-------------------------')
 
 
-solve_expression('A = B')
+solve_expression('( a + b ) + ( c * d )')
 
 
 def p_programa(p):
     '''
     programa : PROGRAM ID EOL programa1
     '''
+    print('Code compiled without problems')
 
 def p_programa1(p):
     '''
@@ -205,20 +212,17 @@ def p_vars(p):
     '''
     vars : VAR ID vars1
     '''
-    add_to_step_stack(p[2])
 
 def p_vars1(p):
     '''
     vars1 : COMMA ID vars1
             | COLON type
     '''
-    add_to_step_stack(p[2])
 
 def p_vars2(p):
     '''
     vars2 : ID vars1
     '''
-    add_to_step_stack(p[1])
 
 def p_vars3(p):
     '''
@@ -231,13 +235,11 @@ def p_type(p):
     type : INT EOL vars3
         | FLOAT EOL vars3
     '''
-    add_to_step_stack(p[1])
 
 def p_body(p):
     '''
     body : LBRACKET body1 RBRACKET
     '''
-
 
 def p_body1(p):
     '''
@@ -259,13 +261,11 @@ def p_print(p):
     print : COUT LPAREN print1
     '''
 
-
 def p_print1(p):
     '''
     print1 : expression print2
         | CTE_STRING print2
     '''
-
 
 def p_print2(p):
     '''
@@ -358,7 +358,6 @@ def p_error(p):
 
 parser = yacc.yacc()
 parser.parse('program pt2; var i: int; j : float; {i = 1; j = 2;} end')
-# process_step_stack()
 
 
 
