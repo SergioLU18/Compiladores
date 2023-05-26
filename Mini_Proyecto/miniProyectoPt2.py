@@ -122,50 +122,72 @@ def process_step_stack():
     print('Code compiled without errors')
 
 
-def generate_operation_quadruple(operands_stack, operator_stack, quadruple_array):
-    global temp_count
+rel_ops = {'>', '<', '!=', '='}
+ar_ops = {'+', '-', '*', '/'}
+hierarchy_table = {'*': 1, '/': 1, '+': 2, '-': 2, '<': 3, '>': 3, '!=': 3, '=': 4}
+temp_count = 0
+env = {}
+
+
+def solve_operation(operands_stack, operator_stack, quadruple_array):
+    global temp_count, env
     right_operand = operands_stack.pop()
     left_operand = operands_stack.pop()
     operator = operator_stack.pop()
     temp_count = temp_count + 1
     new_temp_var = 'T' + str(temp_count)
-    quadruple_array.append([operator, right_operand, left_operand, new_temp_var])
+    quadruple_array.append([operator, left_operand, right_operand, new_temp_var])
     operands_stack.append(new_temp_var)
+    if operator == '=':
+        env[left_operand] = right_operand
 
 
-rel_ops = {'>', '<', '!='}
-ar_ops = {'+', '-', '*', '/'}
-hierarchy_table = {'+': 2, '-': 2, '*': 1, '/': 1}
-temp_count = 0
-
-def process_expression(expression):
-    global rel_ops, ar_ops, hierarchy_table, temp_count
+def solve_expression(expression):
+    global rel_ops, ar_ops, hierarchy_table, temp_count, env
     operator_stack = []
     operands_stack = []
     quadruple_array = []
     steps = expression.split()
     for index, step in enumerate(steps):
-        if step in rel_ops or step in ar_ops:
+        if step == '(':
+            operator_stack.append(step)
+            continue
+        elif step in rel_ops:
+            # Relation operators get immediately added to the stack. No operations needed yet
+            operator_stack.append(step)
+        elif step in ar_ops:
             # Before introducing a new operator, we always have to check what the last operator's hierarchy
-            if len(operator_stack) == 0:
-                # If there are no operands, we just continue
+            if len(operator_stack) == 0 or operator_stack[-1] == '(':
+                # If the operator stack is empty, or we entered a new section - we add the operator
                 operator_stack.append(step)
                 continue
-            if hierarchy_table[step] == hierarchy_table[operator_stack[-1]]:
-                # If both have the same hierarchy, then we can solve the last operator
-                generate_operation_quadruple(operands_stack, operator_stack, quadruple_array)
-            elif hierarchy_table[step] == 2:
-                # If new operator has lower hierarchy, then we solve the last operator
-                generate_operation_quadruple(operands_stack, operator_stack, quadruple_array)
+            while len(operator_stack) and hierarchy_table[operator_stack[-1]] <= hierarchy_table[step]:
+                # If last operator has higher or equal hierarchy, we need to solve
+                solve_operation(operands_stack, operator_stack, quadruple_array)
             operator_stack.append(step)
+        elif step == ')':
+            # If we find a closing parenthesis, we need to clear everything inside
+            while len(operator_stack) and operator_stack[-1] != '(':
+                solve_operation(operands_stack, operator_stack, quadruple_array)
+            operator_stack.pop()
         else:
+            # If no other conditions were true, then we found an ID
             operands_stack.append(step)
-            while index == len(steps) - 1 and len(operator_stack):
-                generate_operation_quadruple(operands_stack, operator_stack, quadruple_array)
+        # After doing all the steps, we need to clear any remaining operations that were already ordered correctly
+        while index == len(steps) - 1 and len(operator_stack):
+            solve_operation(operands_stack, operator_stack, quadruple_array)
+    print('----- QUADRUPLE LIST -----')
     for quadruple in quadruple_array:
         print(quadruple)
-    print('Result is: ' + str(operands_stack.pop()))
+    print('--------------------------')
+    print('RESULT IS: ' + str(operands_stack.pop()))
+    print('----- VARIABLE LIST -----')
+    for var, value in env.items():
+        print(var, '=', value)
+    print('-------------------------')
 
+
+solve_expression('A = B')
 
 
 def p_programa(p):
@@ -335,9 +357,8 @@ def p_error(p):
 
 
 parser = yacc.yacc()
-# parser.parse('program pt2; var i: int; j : float; {} end')
+parser.parse('program pt2; var i: int; j : float; {i = 1; j = 2;} end')
 # process_step_stack()
-process_expression('A / B + C + D + E * F')
 
 
 
