@@ -85,9 +85,9 @@ def t_ID(t):
             process_jump()
             jumps.append(['goTo', len(quadruple_array), ''])
         elif tok == 'DO':
-            breadcrumb_stack.append(len(quadruple_array))
+            breadcrumb_stack.append(len(quadruple_array) + 1)
         elif tok == 'WHILE':
-            pending_jumps.append(['goToV', '', ''])
+            pending_jumps.append(['goToT', '', ''])
         t.type = t.value.upper();
     return t;
 
@@ -129,7 +129,7 @@ counter = 1
 
 def process_jump():
     jump = jumps.pop()
-    if len(breadcrumb_stack):
+    if len(breadcrumb_stack) and jump[0] == 'goToT':
         quadruple_array[jump[1] - 1][2] = breadcrumb_stack.pop()
     else:
         quadruple_array[jump[1] - 1][2] = len(quadruple_array) + 1
@@ -421,10 +421,18 @@ lexer = lex.lex()
 parser = yacc.yacc()
 
 program_string = '''program pt2; var a, b, c, d, e: int; { 
-                        do {
-                            a = b / c;
-                        }
-                        while (a + b);
+                        if (a > b) {
+                            a = b * c;
+                            do {
+                                a = b * c;
+                                if ( a > b) { 
+                                    a = b * c;
+                                }
+                                else {
+                                    a = b * c;
+                                };
+                            } while (a > b);
+                        } ;
                     } end'''
 
 parser.parse(program_string)
