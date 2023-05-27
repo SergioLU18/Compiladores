@@ -44,7 +44,6 @@ t_EQUAL = r'\='
 t_LESS = r'\<'
 t_GREATER = r'\>'
 t_COMMA = r'\,'
-t_LBRACKET = r'\{'
 t_RBRACKET = r'\}'
 t_NOTEQUAL = r'\!='
 t_COLON = r'\:'
@@ -63,15 +62,43 @@ def t_CTE_INT(t):
     t.value = int(t.value)
     return t
 
+# JUMPS STRUCTURE
+
+# IN PENDING JUMPS
+# TYPE OF JUMP | EMPTY | EMPTY
+
+# IN JUMPS
+# TYPE OF JUMP | POSITION IN QUADRUPLES | EMPTY
+
+# IN QUADRUPLES
+# TYPE OF JUMP | CONDITION (OPTIONAL) | WHERE SHOULD IT JUMP
 
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
-    global tokens, jumps_counter
+    global tokens
     if t.value.upper() in tokens:
-        if t.value.upper() == 'IF':
+        tok = t.value.upper()
+        if tok == 'IF':
             pending_jumps.append(['goToF', '', ''])
+        elif tok == 'ELSE':
+            quadruple_array.append(['goTo', '', ''])
+            process_jump()
+            jumps.append(['goTo', len(quadruple_array), ''])
+        elif tok == 'DO':
+            breadcrumb_stack.append(len(quadruple_array))
+        elif tok == 'WHILE':
+            pending_jumps.append(['goToV', '', ''])
         t.type = t.value.upper();
     return t;
+
+def t_LBRACKET(t):
+    r'\{'
+    if len(pending_jumps) and len(operands_stack):
+        jump = pending_jumps.pop()
+        quadruple_array.append([jump[0], operands_stack.pop(), ''])
+        jump[1] = len(quadruple_array)
+        jumps.append(jump)
+    return t
 
 def t_CTE_STRING(t):
     r'\"(.+?)\"'
@@ -96,8 +123,16 @@ operands_stack = []
 pending_jumps = []
 jumps = []
 token_list = []
+breadcrumb_stack = []
 
 counter = 1
+
+def process_jump():
+    jump = jumps.pop()
+    if len(breadcrumb_stack):
+        quadruple_array[jump[1] - 1][2] = breadcrumb_stack.pop()
+    else:
+        quadruple_array[jump[1] - 1][2] = len(quadruple_array) + 1
 
 
 def get_operation_result_type(a_type, b_type, operation):
@@ -133,12 +168,8 @@ def process_var_stack():
     return True
 
 
-
-
 def solve_operation():
     global temp_count
-    if len(operands_stack) < 2:
-        return
     right_operand = operands_stack.pop()
     left_operand = operands_stack.pop()
     operator = operator_stack.pop()
@@ -206,7 +237,6 @@ def p_vars2(p):
     add_to_var_stack(p[1])
 
 
-
 def p_vars3(p):
     '''
     vars3 : vars2
@@ -224,9 +254,6 @@ def p_body(p):
     '''
     body : LBRACKET body1 RBRACKET
     '''
-    if len(jumps):
-        jump = jumps.pop()
-        quadruple_array[jump[1] - 1][2] = len(quadruple_array) + 1
 
 def p_body1(p):
     '''
@@ -280,7 +307,10 @@ def p_expression(p):
 # JUMPS STRUCTURE
 
 # IN PENDING JUMPS
-# TYPE OF JUMP | POSITION IN QUADRUPLES | WHERE SHOULD IT JUMP
+# TYPE OF JUMP | EMPTY | EMPTY
+
+# IN JUMPS
+# TYPE OF JUMP | POSITION IN QUADRUPLES | EMPTY
 
 # IN QUADRUPLES
 # TYPE OF JUMP | CONDITION (OPTIONAL) | WHERE SHOULD IT JUMP
@@ -295,21 +325,23 @@ def p_expression1(p):
     if len(p) > 2:
         operator_stack.append(p[1])
         solve_operation()
-    if len(p) == 1 and len(pending_jumps) and len(operands_stack) == 1:
-        jump = pending_jumps.pop()
-        quadruple_array.append([jump[0], operands_stack.pop(), ''])
-        jump[1] = len(quadruple_array)
-        jumps.append(jump)
 
 def p_cycle(p):
     '''
     cycle : DO body WHILE LPAREN expression RPAREN EOL
     '''
+    jump = pending_jumps.pop()
+    jump[1] = operands_stack.pop()
+    quadruple_array.append(jump)
+    jumps.append([jump[0], len(quadruple_array), ''])
+    process_jump()
 
 def p_condition(p):
     '''
     condition : IF LPAREN expression RPAREN body condition1
     '''
+    if len(jumps):
+        process_jump()
 
 
 def p_condition1(p):
@@ -317,6 +349,7 @@ def p_condition1(p):
     condition1 : ELSE body EOL
                 | EOL
     '''
+
 
 def p_factor(p):
     '''
@@ -388,13 +421,11 @@ lexer = lex.lex()
 parser = yacc.yacc()
 
 program_string = '''program pt2; var a, b, c, d, e: int; { 
-                        if(a * (b + a)) { 
-                            if(b + c){
-                                a = b * c;
-                            } ;
-                            d = e / c;
+                        do {
+                            a = b / c;
                         }
-                    ;} end'''
+                        while (a + b);
+                    } end'''
 
 parser.parse(program_string)
 
