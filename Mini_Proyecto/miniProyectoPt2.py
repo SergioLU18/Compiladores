@@ -56,7 +56,6 @@ def t_CTE_FLOAT(t):
     t.value = float(t.value)
     return t
 
-
 def t_CTE_INT(t):
     r'-?\d+'
     t.value = int(t.value)
@@ -85,7 +84,7 @@ def t_ID(t):
             process_jump()
             jumps.append(['goTo', len(quadruple_array), ''])
         elif tok == 'DO':
-            breadcrumb_stack.append(len(quadruple_array) + 1)
+            pending_jumps.append('DO')
         elif tok == 'WHILE':
             pending_jumps.append(['goToT', '', ''])
         t.type = t.value.upper();
@@ -93,11 +92,15 @@ def t_ID(t):
 
 def t_LBRACKET(t):
     r'\{'
-    if len(pending_jumps) and len(operands_stack):
+    if len(pending_jumps) and pending_jumps[0] == 'DO':
+        pending_jumps.pop()
+        breadcrumb_stack.append(len(quadruple_array) + 1)
+    elif len(pending_jumps) and len(operands_stack):
         jump = pending_jumps.pop()
         quadruple_array.append([jump[0], operands_stack.pop(), ''])
         jump[1] = len(quadruple_array)
         jumps.append(jump)
+
     return t
 
 def t_CTE_STRING(t):
@@ -170,6 +173,8 @@ def process_var_stack():
 
 def solve_operation():
     global temp_count
+    if not len(operator_stack):
+        return
     right_operand = operands_stack.pop()
     left_operand = operands_stack.pop()
     operator = operator_stack.pop()
@@ -180,8 +185,8 @@ def solve_operation():
 
 def print_quadruples():
     print('----- QUADRUPLES -----')
-    for quadruple in quadruple_array:
-        print(quadruple)
+    for index, quadruple in enumerate(quadruple_array):
+        print(index + 1, quadruple)
     print('----------------------')
 
 
@@ -194,12 +199,6 @@ def flatten_list(items):
         else:
             flattened_list.append(item)
     return flattened_list
-
-def print_quadruples():
-    print('----- QUADRUPLE LIST -----')
-    for quadruple in quadruple_array:
-        print(quadruple)
-    print('--------------------------')
 
 def p_programa(p):
     '''
@@ -416,23 +415,15 @@ def p_error(p):
     exit()
 
 
-
 lexer = lex.lex()
 parser = yacc.yacc()
 
 program_string = '''program pt2; var a, b, c, d, e: int; { 
-                        if (a > b) {
-                            a = b * c;
-                            do {
-                                a = b * c;
-                                if ( a > b) { 
-                                    a = b * c;
-                                }
-                                else {
-                                    a = b * c;
-                                };
-                            } while (a > b);
-                        } ;
+                        do
+                        {
+                            a = b / c;
+                        }
+                        while (a + b);
                     } end'''
 
 parser.parse(program_string)
