@@ -44,6 +44,7 @@ t_EQUAL = r'\='
 t_LESS = r'\<'
 t_GREATER = r'\>'
 t_COMMA = r'\,'
+t_LBRACKET = r'\{'
 t_RBRACKET = r'\}'
 t_NOTEQUAL = r'\!='
 t_COLON = r'\:'
@@ -76,31 +77,7 @@ def t_ID(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
     global tokens
     if t.value.upper() in tokens:
-        tok = t.value.upper()
-        if tok == 'IF':
-            pending_jumps.append(['goToF', '', ''])
-        elif tok == 'ELSE':
-            quadruple_array.append(['goTo', '', ''])
-            process_jump()
-            jumps.append(['goTo', len(quadruple_array), ''])
-        elif tok == 'DO':
-            pending_jumps.append('DO')
-        elif tok == 'WHILE':
-            pending_jumps.append(['goToT', '', ''])
-        t.type = t.value.upper();
-    return t;
-
-def t_LBRACKET(t):
-    r'\{'
-    if len(pending_jumps) and pending_jumps[0] == 'DO':
-        pending_jumps.pop()
-        breadcrumb_stack.append(len(quadruple_array) + 1)
-    elif len(pending_jumps) and len(operands_stack):
-        jump = pending_jumps.pop()
-        quadruple_array.append([jump[0], operands_stack.pop(), ''])
-        jump[1] = len(quadruple_array)
-        jumps.append(jump)
-
+        t.type = t.value.upper()
     return t
 
 def t_CTE_STRING(t):
@@ -112,7 +89,7 @@ def t_error(t):
     t.lexer.skip(1)
 
 
-var_table = {}
+var_type_table = {}
 var_stack = []
 var_line = []
 rel_ops = {'>', '<', '!=', '='}
@@ -130,12 +107,18 @@ breadcrumb_stack = []
 
 counter = 1
 
+# JUMPS STRUCTURE
+
+# IN JUMPS
+# TYPE OF JUMP | POSITION IN QUADRUPLES | EMPTY
+
+# IN QUADRUPLES
+# TYPE OF JUMP | CONDITION (OPTIONAL) | WHERE SHOULD IT JUMP
+
+
 def process_jump():
     jump = jumps.pop()
-    if len(breadcrumb_stack) and jump[0] == 'goToT':
-        quadruple_array[jump[1] - 1][2] = breadcrumb_stack.pop()
-    else:
-        quadruple_array[jump[1] - 1][2] = len(quadruple_array) + 1
+    quadruple_array[jump[1] - 1][2] = len(quadruple_array) + 1
 
 
 def get_operation_result_type(a_type, b_type, operation):
@@ -154,21 +137,17 @@ def add_to_var_stack(step):
 
 
 def process_var_stack():
-    # if not correct_syntax:
-    #     return False
     types = {'int', 'float'}
     while len(var_stack):
         step = var_stack.pop()
         if step in types:
             var_type = step
             for i in var_line:
-                var_table[i] = var_type
+                var_type_table[i] = var_type
             var_line.clear()
             continue
         else:
             var_line.append(step)
-    print(var_table)
-    return True
 
 
 def solve_operation():
@@ -182,6 +161,7 @@ def solve_operation():
     new_temp_var = 'T' + str(temp_count)
     quadruple_array.append([operator, left_operand, right_operand, new_temp_var])
     operands_stack.append(new_temp_var)
+    var_type_table[new_temp_var] = get_operation_result_type(var_type_table[left_operand], var_type_table[right_operand], operator)
 
 def print_quadruples():
     print('----- QUADRUPLES -----')
@@ -190,15 +170,12 @@ def print_quadruples():
     print('----------------------')
 
 
+def print_var_type_table():
+    print('--- VAR TYPE TABLE ---')
+    for key in var_type_table:
+        print('var:', key, '| type:', var_type_table[key])
+    print('----------------------')
 
-def flatten_list(items):
-    flattened_list = []
-    for item in items:
-        if isinstance(item, list):
-            flattened_list.extend(item)
-        else:
-            flattened_list.append(item)
-    return flattened_list
 
 def p_programa(p):
     '''
@@ -219,6 +196,7 @@ def p_vars(p):
     vars : VAR ID vars1
     '''
     add_to_var_stack(p[2])
+    process_var_stack()
 
 
 def p_vars1(p):
@@ -292,7 +270,7 @@ def p_assign(p):
     '''
     operands_stack.append(p[1])
     operator_stack.append(p[2])
-    if p[1] not in var_stack:
+    if p[1] not in var_type_table:
         print("ERROR: UNDECLARED VARIABLE '" + p[1] + "' USED")
         exit()
     solve_operation()
@@ -301,18 +279,6 @@ def p_expression(p):
     '''
     expression : exp expression1
     '''
-
-
-# JUMPS STRUCTURE
-
-# IN PENDING JUMPS
-# TYPE OF JUMP | EMPTY | EMPTY
-
-# IN JUMPS
-# TYPE OF JUMP | POSITION IN QUADRUPLES | EMPTY
-
-# IN QUADRUPLES
-# TYPE OF JUMP | CONDITION (OPTIONAL) | WHERE SHOULD IT JUMP
 
 def p_expression1(p):
     '''
@@ -327,27 +293,55 @@ def p_expression1(p):
 
 def p_cycle(p):
     '''
-    cycle : DO body WHILE LPAREN expression RPAREN EOL
+    cycle : do_helper body WHILE LPAREN expression_cycle RPAREN EOL
     '''
-    jump = pending_jumps.pop()
-    jump[1] = operands_stack.pop()
-    quadruple_array.append(jump)
-    jumps.append([jump[0], len(quadruple_array), ''])
-    process_jump()
+    quadruple_array.append(['GoToT', operands_stack.pop(), breadcrumb_stack.pop()])
+
+
+def p_do_helper(p):
+    '''
+    do_helper : DO
+    '''
+    breadcrumb_stack.append(len(quadruple_array) + 1)
+
+
+def p_expression_cycle(p):
+    '''
+    expression_cycle : expression
+    '''
+    pending_jumps.append(['goToT', '', ''])
+
 
 def p_condition(p):
     '''
-    condition : IF LPAREN expression RPAREN body condition1
+    condition : IF LPAREN expression_condition RPAREN body condition1
     '''
     if len(jumps):
         process_jump()
 
 
+def p_expression_condition(p):
+    '''
+    expression_condition : expression
+    '''
+    quadruple_array.append(['GoToF', operands_stack.pop(), ''])
+    jumps.append(['GoToF', len(quadruple_array)])
+
+
 def p_condition1(p):
     '''
-    condition1 : ELSE body EOL
+    condition1 : else_helper body EOL
                 | EOL
     '''
+
+
+def p_else_helper(p):
+    '''
+    else_helper : ELSE
+    '''
+    quadruple_array.append(['goTo', '', ''])
+    process_jump()
+    jumps.append(['goTo', len(quadruple_array), ''])
 
 
 def p_factor(p):
@@ -367,7 +361,7 @@ def p_factor1(p):
             | cte
     '''
     if p[1] is not None:
-        if p[1] not in var_stack:
+        if p[1] not in var_type_table:
             print("ERROR: UNDECLARED VARIABLE '" + p[1] + "' USED")
             exit()
         operands_stack.append(p[1])
@@ -418,17 +412,21 @@ def p_error(p):
 lexer = lex.lex()
 parser = yacc.yacc()
 
-program_string = '''program pt2; var a, b, c, d, e: int; { 
-                        do
-                        {
-                            a = b / c;
+program_string = '''program pt2; var a, b, c, d, e: int; k : float; { 
+                        do {
+                        a = b * c;
+                        if ( a > b ) {
+                        c = a * k;
+                        };
                         }
-                        while (a + b);
+                        while (a > b);
                     } end'''
 
 parser.parse(program_string)
 
 print_quadruples()
+
+print_var_type_table()
 
 
 
