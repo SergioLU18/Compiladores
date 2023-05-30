@@ -81,7 +81,7 @@ def t_ID(t):
     return t
 
 def t_CTE_STRING(t):
-    r'\"(.+?)\"'
+    r'\"[a-zA-Z0-9\s\S]+\"'
     return t
 
 def t_error(t):
@@ -101,10 +101,10 @@ env = {}
 quadruple_array = []
 operator_stack = []
 operands_stack = []
-pending_jumps = []
 jumps = []
 token_list = []
 breadcrumb_stack = []
+print_string_stack= []
 
 counter = 1
 
@@ -271,19 +271,32 @@ def p_print(p):
     '''
     print : COUT LPAREN print1
     '''
-    quadruple_array.append(['COUT', operands_stack.pop()])
+    global print_string_stack
+    quadruple_array.append(['COUT', print_string_stack])
+    print_string_stack = []
 
 def p_print1(p):
     '''
-    print1 : expression print2
+    print1 : expression_print print2
         | CTE_STRING print2
     '''
+    global print_string_stack
+    if isinstance(p[1], str):
+        print_string_stack.append(p[1])
 
 def p_print2(p):
     '''
     print2 : COMMA print1
         | RPAREN EOL
     '''
+
+
+def p_expression_print(p):
+    '''
+    expression_print : expression
+    '''
+    global print_string_stack
+    print_string_stack.append(operands_stack.pop())
 
 def p_assign(p):
     '''
@@ -311,7 +324,7 @@ def p_expression1(p):
 
 def p_cycle(p):
     '''
-    cycle : do_helper body WHILE LPAREN expression_cycle RPAREN EOL
+    cycle : do_helper body WHILE LPAREN expression RPAREN EOL
     '''
     quadruple_array.append(['GoToT', operands_stack.pop(), breadcrumb_stack.pop()])
 
@@ -321,13 +334,6 @@ def p_do_helper(p):
     do_helper : DO
     '''
     breadcrumb_stack.append(len(quadruple_array) + 1)
-
-
-def p_expression_cycle(p):
-    '''
-    expression_cycle : expression
-    '''
-    pending_jumps.append(['goToT', '', ''])
 
 
 def p_condition(p):
@@ -492,7 +498,14 @@ def boot_vm():
                         var_value_table[store_variable] = 1 if left_operand_value != right_operand_value else 0
             pos += 1
         elif quadruple[0] == 'COUT':
-            print('COUT >>', var_value_table[quadruple[1]])
+            print_string = ''
+            while len(quadruple[1]):
+                item = quadruple[1].pop()
+                if item.startswith('"') and item.endswith('"'):
+                    print_string += item[1:-1]
+                else:
+                    print_string += str(var_value_table[item])
+            print('COUT >>', print_string)
             pos += 1
         else:
             # Remaining cases are all jumps
@@ -543,7 +556,7 @@ factorial = '''program pt2; var n, a, b, c: int; {
                             a = a * n;
                             n = n - 1;
                         } while (n > 0);
-                        cout(a);
+                        cout("Result: ",a);
                     } end'''
 
 parser.parse(factorial)
