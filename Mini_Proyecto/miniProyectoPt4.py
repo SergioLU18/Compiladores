@@ -90,9 +90,10 @@ def t_error(t):
 
 
 var_type_table = {}
+var_value_table = {}
 var_stack = []
 var_line = []
-rel_ops = {'>', '<', '!=', '='}
+rel_ops = {'>', '<', '!='}
 ar_ops = {'+', '-', '*', '/'}
 hierarchy_table = {'*': 1, '/': 1, '+': 2, '-': 2, '<': 3, '>': 3, '!=': 3, '=': 4}
 temp_count = 0
@@ -150,7 +151,7 @@ def process_var_stack():
             var_line.append(step)
 
 
-def solve_operation():
+def process_operation():
     global temp_count
     if not len(operator_stack):
         return
@@ -159,9 +160,22 @@ def solve_operation():
     operator = operator_stack.pop()
     temp_count = temp_count + 1
     new_temp_var = 'T' + str(temp_count)
-    quadruple_array.append([operator, left_operand, right_operand, new_temp_var])
-    operands_stack.append(new_temp_var)
-    var_type_table[new_temp_var] = get_operation_result_type(var_type_table[left_operand], var_type_table[right_operand], operator)
+    if operator == '=':
+        quadruple_array.append([operator, left_operand, right_operand])
+    else:
+        quadruple_array.append([operator, left_operand, right_operand, new_temp_var])
+        operands_stack.append(new_temp_var)
+        if isinstance(left_operand, str):
+            left_operand_type = var_type_table[left_operand]
+        else:
+            left_operand_type = 'int' if isinstance(left_operand, int) else 'float'
+        if isinstance(right_operand, str):
+            right_operand_type = var_type_table[right_operand]
+        else:
+            right_operand_type = 'int' if isinstance(right_operand, int) else 'float'
+        temp_var_type = get_operation_result_type(left_operand_type, right_operand_type, operator)
+        var_type_table[new_temp_var] = temp_var_type
+
 
 def print_quadruples():
     print('----- QUADRUPLES -----')
@@ -176,6 +190,12 @@ def print_var_type_table():
         print('var:', key, '| type:', var_type_table[key])
     print('----------------------')
 
+
+def print_var_value_table():
+    print('--- VAR VALUE TABLE ---')
+    for key in var_value_table:
+        print('var:', key, '| value:', var_value_table[key])
+    print('----------------------')
 
 def p_programa(p):
     '''
@@ -251,6 +271,7 @@ def p_print(p):
     '''
     print : COUT LPAREN print1
     '''
+    quadruple_array.append(['COUT', operands_stack.pop()])
 
 def p_print1(p):
     '''
@@ -270,10 +291,7 @@ def p_assign(p):
     '''
     operands_stack.append(p[1])
     operator_stack.append(p[2])
-    if p[1] not in var_type_table:
-        print("ERROR: UNDECLARED VARIABLE '" + p[1] + "' USED")
-        exit()
-    solve_operation()
+    process_operation()
 
 def p_expression(p):
     '''
@@ -289,7 +307,7 @@ def p_expression1(p):
     '''
     if len(p) > 2:
         operator_stack.append(p[1])
-        solve_operation()
+        process_operation()
 
 def p_cycle(p):
     '''
@@ -353,7 +371,7 @@ def p_factor(p):
     '''
     if len(p) == 3:
         operator_stack(p[1])
-        solve_operation()
+        process_operation()
 
 def p_factor1(p):
     '''
@@ -361,9 +379,6 @@ def p_factor1(p):
             | cte
     '''
     if p[1] is not None:
-        if p[1] not in var_type_table:
-            print("ERROR: UNDECLARED VARIABLE '" + p[1] + "' USED")
-            exit()
         operands_stack.append(p[1])
 
 
@@ -380,7 +395,7 @@ def p_exp1(p):
     '''
     if len(p) == 4:
         operator_stack.append(p[2])
-        solve_operation()
+        process_operation()
 
 def p_term(p):
     '''
@@ -395,13 +410,14 @@ def p_term1(p):
     '''
     if len(p) == 4:
         operator_stack.append(p[2])
-        solve_operation()
+        process_operation()
 
 def p_cte(p):
     '''
     cte : CTE_INT
         | CTE_FLOAT
     '''
+    operands_stack.append(p[1])
 
 def p_error(p):
     print("SYNTAX ERROR FOUND")
@@ -409,24 +425,131 @@ def p_error(p):
     exit()
 
 
+def check_declared(variable):
+    if variable not in var_type_table:
+        print("ERROR: UNDECLARED VARIABLE '" + variable + "' used")
+        exit()
+
+
+def check_initialized(variable):
+    if variable not in var_value_table:
+        print("ERROR: VARIABLE '" + variable + "' WAS DECLARED BUT NEVER INITIALIZED")
+        exit()
+
+
+def check_type_match(left_variable, right_variable):
+    if var_type_table[left_variable] != var_type_table[right_variable]:
+        print("ERROR: TYPE MISSMATCH FOR VARIABLE '" + left_variable + "'")
+        exit()
+
+
+def boot_vm():
+    pos = 0
+    while pos < len(quadruple_array):
+        quadruple = quadruple_array[pos]
+        if quadruple[0] in rel_ops or quadruple[0] in ar_ops or quadruple[0] == '=':
+            # We entered an operation
+            operator = quadruple[0]
+            if operator == '=':
+                left_operand = quadruple[2]
+                right_operand = quadruple[1]
+                # Assign has a specific process with not much re-usability
+                if isinstance(right_operand, str):
+                    check_initialized(right_operand)
+                    check_type_match(left_operand, right_operand)
+                    var_value_table[left_operand] = var_value_table[right_operand]
+                else:
+                    var_value_table[left_operand] = right_operand
+            else:
+                # For every other case, we can factor out some of the process to reduce number of lines
+                left_operand = quadruple[1]
+                right_operand = quadruple[2]
+                left_operand_value = left_operand
+                right_operand_value = right_operand
+                store_variable = quadruple[3]
+                if isinstance(left_operand, str):
+                    check_declared(left_operand)
+                    check_initialized(left_operand)
+                    left_operand_value = var_value_table[left_operand]
+                if isinstance(right_operand, str):
+                    check_declared(right_operand)
+                    check_initialized(right_operand)
+                    right_operand_value = var_value_table[right_operand]
+                match operator:
+                    case '+':
+                        var_value_table[store_variable] = left_operand_value + right_operand_value
+                    case '-':
+                        var_value_table[store_variable] = left_operand_value - right_operand_value
+                    case '*':
+                        var_value_table[store_variable] = left_operand_value * right_operand_value
+                    case '/':
+                        var_value_table[store_variable] = left_operand_value / right_operand_value
+                    case '>':
+                        var_value_table[store_variable] = 1 if left_operand_value > right_operand_value else 0
+                    case '<':
+                        var_value_table[store_variable] = 1 if left_operand_value < right_operand_value else 0
+                    case '!=':
+                        var_value_table[store_variable] = 1 if left_operand_value != right_operand_value else 0
+            pos += 1
+        elif quadruple[0] == 'COUT':
+            print('COUT >>', var_value_table[quadruple[1]])
+            pos += 1
+        else:
+            # Remaining cases are all jumps
+            match quadruple[0]:
+                case 'GoToT':
+                    # DO WHILE
+                    var_condition = quadruple[1]
+                    if var_value_table[var_condition] > 0:
+                        pos = quadruple[2] - 1
+                    else:
+                        pos += 1
+                case 'GoToF':
+                    # IF
+                    var_condition = quadruple[1]
+                    if var_value_table[var_condition] <= 0:
+                        pos = quadruple[2] - 1
+                    else:
+                        pos += 1
+                case 'GoTo':
+                    # ELSE
+                    pos = quadruple[1] - 1
+    print("----- SUCCESSFULLY FINISHED THE PROCESS -----")
+
+
 lexer = lex.lex()
 parser = yacc.yacc()
 
-program_string = '''program pt2; var a, b, c, d, e: int; k : float; { 
+# n is the nth fibonacci number
+fibonacci = '''program pt2; var n, a, b, c: int; { 
+                        n = 5;
+                        a = 0;
+                        b = 1;
+                        c = 0;
                         do {
-                        a = b * c;
-                        if ( a > b ) {
-                        c = a * k;
-                        };
-                        }
-                        while (a > b);
+                            cout(c);
+                            c = a + b;
+                            a = b;
+                            b = c;
+                            n = n - 1;
+                        } while (n > 0);
                     } end'''
 
-parser.parse(program_string)
+# n is the number whose factorial will be calculated
+factorial = '''program pt2; var n, a, b, c: int; { 
+                        n = 5;
+                        a = 1;
+                        do {
+                            a = a * n;
+                            n = n - 1;
+                        } while (n > 0);
+                        cout(a);
+                    } end'''
 
-print_quadruples()
+parser.parse(factorial)
+# print_quadruples()
 
-print_var_type_table()
+boot_vm()
 
 
 
